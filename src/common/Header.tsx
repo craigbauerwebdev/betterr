@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../contexts/auth-context";
 
-function Header() {
+const Header = () => {
+  const { user, logOut } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const logOutAndCloseMenu = () => {
+    logOut();
+    setIsMenuOpen(false);
   };
 
   return (
@@ -66,6 +73,17 @@ function Header() {
               >
                 Relax
               </Link>
+            </li>
+            <li>
+              {user && (
+                <a
+                  href="#"
+                  className="text-sm text-blue-500 hover:text-blue-400"
+                  onClick={logOutAndCloseMenu}
+                >
+                  Log Out
+                </a>
+              )}
             </li>
           </ul>
         </nav>
@@ -137,12 +155,15 @@ function Header() {
                   Relax
                 </Link>
               </li>
+              <li>
+                {user && <button onClick={logOutAndCloseMenu}>Log Out</button>}
+              </li>
             </ul>
           </nav>
         </div>
       </div>
     </header>
   );
-}
+};
 
 export default Header;
