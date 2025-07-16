@@ -27,6 +27,8 @@ const BreathTrainer: React.FC = () => {
   const [circleSize, setCircleSize] = useState<string>("w-32 h-32");
   const [animationDuration, setAnimationDuration] = useState<number>(4);
 
+  const [countdown, setCountdown] = useState<number | null>(null);
+
   const animateCircle = (phase: string, duration: number) => {
     setAnimationDuration(duration);
     switch (phase) {
@@ -64,11 +66,36 @@ const BreathTrainer: React.FC = () => {
     };
   }, [isActive, timeLeft]);
 
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (countdown !== null && countdown > 0) {
+      interval = setInterval(() => {
+        setCountdown((prevCount) =>
+          prevCount !== null ? prevCount - 1 : null
+        );
+      }, 1000);
+    } else if (countdown === 0) {
+      beginExerciseAfterCountdown();
+      setCountdown(null);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [countdown]);
+
   const startExercise = () => {
+    setCountdown(3); // Start the 10-second countdown
+  };
+
+  const beginExerciseAfterCountdown = () => {
     setIsActive(true);
     setTimeLeft(duration * 60);
     setExerciseCompleted(false);
-    runBreathingCycle();
+    resetCircle(); // Reset the circle to its initial state
+    // Add a small delay before starting the first breath cycle
+    setTimeout(() => {
+      runBreathingCycle();
+    }, 100);
   };
 
   const cancelExercise = () => {
@@ -123,12 +150,14 @@ const BreathTrainer: React.FC = () => {
   };
 
   return (
-    <div className="max-w-lg mx-auto mt-0 p-6">
-      <h2 className="text-2xl font-bold mb-4 text-gray-200">Breath Trainer</h2>
-      {!isActive && (
+    <div className="main-wrapper max-w-lg mx-auto mt-0 p-6">
+      <h2 className="text-2xl font-bold mb-4 text-gray-200 text-center">
+        Breath Trainer
+      </h2>
+      {!isActive && countdown === null && (
         <>
           <div className="mb-4">
-            <label className="block mb-2 text-gray-200">
+            <label className="block mb-2 text-gray-200 text-center">
               Select Breathing Pattern:
             </label>
             <select
@@ -145,7 +174,7 @@ const BreathTrainer: React.FC = () => {
           </div>
 
           <div className="mb-4">
-            <label className="block mb-2 text-gray-200">
+            <label className="block mb-2 text-gray-200 text-center">
               Exercise Duration (minutes):
             </label>
             <div className="flex justify-between">
@@ -167,11 +196,16 @@ const BreathTrainer: React.FC = () => {
           <button
             className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
             onClick={startExercise}
-            disabled={isActive}
           >
-            {isActive ? "Exercise in Progress" : "Start Exercise"}
+            Start Exercise
           </button>
         </>
+      )}
+      {countdown !== null && (
+        <div className="mt-4 text-center">
+          {/* <p className="text-white text-4xl font-bold">Get Ready!</p> */}
+          <p className="text-white text-6xl font-bold mt-4">{countdown}</p>
+        </div>
       )}
       {isActive && (
         <div className="mt-4 text-center text-black">
@@ -191,9 +225,9 @@ const BreathTrainer: React.FC = () => {
       )}
 
       {isActive && (
-        <div className="mt-4 text-center text-black w-64 h-64 mx-auto flex items-center justify-center">
+        <div className="circle-warpper mt-4 text-center text-black w-64 h-64 mx-auto flex items-center justify-center">
           <div
-            className={`${circleSize} rounded-full bg-blue-500 transition-all duration-1000 ease-in-out`}
+            className={`${circleSize} rounded-full bg-blue-500 transition-all ease-in-out`}
             style={{
               transitionDuration: `${animationDuration}s`,
               background:
@@ -212,7 +246,7 @@ const BreathTrainer: React.FC = () => {
       {isActive && (
         <div className="text-center mt-8">
           <button
-            className="flex-1 justify-center bg-red-500 text-white p-2 rounded hover:bg-red-600"
+            className="flex-1 justify-center bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
             onClick={cancelExercise}
           >
             Cancel Exercise
