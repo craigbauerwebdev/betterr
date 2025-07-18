@@ -18,7 +18,9 @@ const Header = () => {
   return (
     <header className="sticky top-0 text-white p-4 shadow-md bg-gray-800 z-50">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-blue-500 text-2xl font-bold">Betterr</h1>
+        <Link to="/">
+          <h1 className="text-blue-500 text-2xl font-bold">BetterHuman</h1>
+        </Link>
         <div className="md:hidden">
           <div
             onClick={toggleMenu}
