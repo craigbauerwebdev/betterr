@@ -3,7 +3,7 @@ import Header from "./common/Header";
 import Footer from "./common/Footer";
 import Home from "./components/home";
 import Login from "./common/login";
-//import Signup from "./common/signup";
+import Signup from "./common/signup";
 import BreathTrainer from "./components/breath-trainer";
 import DailyHabbits from "./components/daily-habbits";
 import Relax from "./components/relax";
@@ -33,7 +33,7 @@ const App: React.FC = () => {
                 <VideoProvider>
                   <Routes>
                     <Route path="/login" element={<Login />} />
-                    {/* <Route path="/signup" element={<Signup />} /> */}
+                    <Route path="/signup" element={<Signup />} />
                     <Route
                       path="/"
                       element={

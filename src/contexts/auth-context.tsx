@@ -1,16 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-//import { auth } from "../config/firebase-config";
-/* import {
+import { auth } from "../config/firebase-config";
+import {
+  onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
+  type User,
 } from "firebase/auth";
-import type { User } from "firebase/auth"; */
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  //signUp: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
 }
 
@@ -22,35 +23,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   console.log("Auth Provider Rendered");
   const [user, setUser] = useState<User | null>(null);
 
-  // Simulated authentication function
-  const login = async (
-    username: string,
-    password: string
-  ): Promise<boolean> => {
-    // Hardcoded credentials (replace with database lookup in production)
-    if (username === "craigbauer23@gmail.com" && password === "password") {
-      setUser({ username });
-      localStorage.setItem("user", JSON.stringify({ username }));
-      return true;
-    }
-    return false;
+  const login = async (email: string, password: string): Promise<void> => {
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const logOut = () => {
-    console.log("User logged out");
-    setUser(null);
-    localStorage.removeItem("user");
+  const signUp = async (email: string, password: string): Promise<void> => {
+    await createUserWithEmailAndPassword(auth, email, password);
+  };
+
+  const logOut = async (): Promise<void> => {
+    await signOut(auth);
   };
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+    });
+    return () => unsubscribe();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, login, logOut }}>
+    <AuthContext.Provider value={{ user, login, signUp, logOut }}>
       {children}
     </AuthContext.Provider>
   );

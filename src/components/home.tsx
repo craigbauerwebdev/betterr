@@ -19,7 +19,23 @@ interface HabitStatus {
   [habitId: string]: boolean;
 }
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884d8",
+  "#83A6ED",
+  "#8DD1E1",
+  "#82CA9D",
+  "#A4DE6C",
+  "#D0ED57",
+  "#FFC658",
+  "#FF9F40",
+  "#B39DDB",
+  "#4DB6AC",
+  "#F06292",
+];
 
 const Home: React.FC = () => {
   const { database } = useFirebase();
@@ -110,44 +126,50 @@ const Home: React.FC = () => {
         <h3 className="text-xl font-semibold mb-2 text-blue-300">
           Overall Habit Distribution
         </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <PieChart>
-            <Pie
-              data={habitCompletionData}
-              cx="50%"
-              cy="50%"
-              //labelLine={false}
-              outerRadius={100}
-              fill="#8884d8"
-              dataKey="completionRate"
-              //label={({ name, value }) => `${name}: ${value.toFixed(2)}%`}
-              //label={({ value }) => `${value.toFixed(2)}%`}
-              labelLine={true}
-              label={({ name, value, percent, x, y, cx }) => {
-                return (
-                  <text
-                    x={x}
-                    y={y}
-                    fill="#fff"
-                    textAnchor={x > cx ? "start" : "end"}
-                    dominantBaseline="central"
-                    fontSize="10"
-                  >
-                    {`${name}: ${value.toFixed(0)}%`}
-                  </text>
-                );
-              }}
-            >
-              {habitCompletionData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+        <div className="flex items-start gap-6">
+          <div className="flex-1">
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={habitCompletionData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  fill="#8884d8"
+                  dataKey="completionRate"
+                  labelLine={false}
+                  label={false}
+                >
+                  {habitCompletionData.map((_, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="w-auto max-w-full text-sm self-center md:self-center shrink-0">
+            <div className="space-y-2">
+              {habitCompletionData.map((item, index) => (
+                <div key={`legend-${index}`} className="flex items-center gap-2">
+                  <span
+                    className="inline-block"
+                    style={{
+                      width: 12,
+                      height: 12,
+                      backgroundColor: COLORS[index % COLORS.length],
+                      borderRadius: 2,
+                    }}
+                  />
+                  <span className="text-gray-300">{item.name}</span>
+                </div>
               ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="mb-8">
