@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { ref, get, child } from "firebase/database";
 import { useFirebase } from "../contexts/firebase-context";
+import { useAuth } from "../contexts/auth-context";
 import {
   BarChart,
   Bar,
@@ -39,14 +40,19 @@ const COLORS = [
 
 const Home: React.FC = () => {
   const { database } = useFirebase();
+  const { user } = useAuth();
   const [allHabitStatus, setAllHabitStatus] = useState<{
     [date: string]: HabitStatus;
   }>({});
 
   const loadAllHabitStatus = useCallback(async () => {
+    if (!user) {
+      setAllHabitStatus({});
+      return;
+    }
     const dbRef = ref(database);
     try {
-      const snapshot = await get(child(dbRef, "habitStatus"));
+      const snapshot = await get(child(dbRef, `users/${user.uid}/habitStatus`));
       if (snapshot.exists()) {
         setAllHabitStatus(snapshot.val());
       } else {
@@ -55,7 +61,7 @@ const Home: React.FC = () => {
     } catch (error) {
       console.error("Error loading all habit status:", error);
     }
-  }, [database]);
+  }, [database, user]);
 
   useEffect(() => {
     loadAllHabitStatus();

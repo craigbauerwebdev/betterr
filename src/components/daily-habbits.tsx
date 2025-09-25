@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ref, set, get, child } from "firebase/database";
 import { useFirebase } from "../contexts/firebase-context";
+import { useAuth } from "../contexts/auth-context";
 
 const habitsList = [
   { id: "slp", text: "Get 7+ hours of sleep" },
@@ -27,6 +28,7 @@ interface HabitStatus {
 
 const DailyHabbits: React.FC = () => {
   const { database } = useFirebase();
+  const { user } = useAuth();
 
   const [habitStatus, setHabitStatus] = useState<HabitStatus>({});
   const [date, setDate] = useState(() => {
@@ -41,9 +43,13 @@ const DailyHabbits: React.FC = () => {
   }>({});
 
   const loadAllHabitStatus = async () => {
+    if (!user) {
+      setAllHabitStatus({});
+      return;
+    }
     const dbRef = ref(database);
     try {
-      const snapshot = await get(child(dbRef, "habitStatus"));
+      const snapshot = await get(child(dbRef, `users/${user.uid}/habitStatus`));
       if (snapshot.exists()) {
         setAllHabitStatus(snapshot.val());
       } else {
@@ -56,7 +62,7 @@ const DailyHabbits: React.FC = () => {
 
   useEffect(() => {
     loadAllHabitStatus();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     loadHabitStatus();
@@ -71,9 +77,15 @@ const DailyHabbits: React.FC = () => {
   };
 
   const loadHabitStatus = async () => {
+    if (!user) {
+      setHabitStatus({});
+      return;
+    }
     const dbRef = ref(database);
     try {
-      const snapshot = await get(child(dbRef, `habitStatus/${date}`));
+      const snapshot = await get(
+        child(dbRef, `users/${user.uid}/habitStatus/${date}`)
+      );
       if (snapshot.exists()) {
         setHabitStatus(snapshot.val());
       } else {
@@ -85,8 +97,12 @@ const DailyHabbits: React.FC = () => {
   };
 
   const saveHabitStatus = async (habitId: string, completed: boolean) => {
+    if (!user) return;
     try {
-      await set(ref(database, `habitStatus/${date}/${habitId}`), completed);
+      await set(
+        ref(database, `users/${user.uid}/habitStatus/${date}/${habitId}`),
+        completed
+      );
     } catch (error) {
       console.error("Error saving habit status:", error);
     }
